@@ -1,0 +1,2 @@
+kivy[base]
+japanize-kivy
