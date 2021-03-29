@@ -10,8 +10,8 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.graphics import Rectangle, Color
 from kivy.lang.builder import Builder
 
-from calendarwidget.colors import KivyRgbaColor, ColorTheme
-from calendarwidget.backgroundwidgets import BackgroundButton, BackgroundColor, BackgroundLabel
+from kivycalendarwidget.colors import KivyRgbaColor, ColorTheme
+from kivycalendarwidget.backgroundwidgets import BackgroundButton, BackgroundColor, BackgroundLabel
 
 
 Builder.load_string('''
@@ -248,7 +248,7 @@ Builder.load_string('''
 #</KvLang>
 ''')
 
-class CalendarWidget(BoxLayout):
+class KivyCalendarWidget(BoxLayout):
     '''
         A simple calender widget made by Kivy
         
