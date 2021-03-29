@@ -29,26 +29,26 @@ Builder.load_string('''
         id: lbl_month
         pos_hint: {'x': 2/7, 'y': 0}
         size_hint: 3/7, 1
-        text: '3月'
+        # text: '3月'
         font_size: 25
     
     Label:
         id: lbl_year
         pos_hint: {'x': 0, 'y': 0}
         size_hint: 2/7, 0.5
-        text: '2021'
+        # text: '2021'
     
     Button:
         id: btn_previous
         pos_hint: {'x': 5/7, 'y': 0}
         size_hint: 1/7, 1
-        text: '←'
+        text: '<<'
     
     Button:
         id: btn_next
         pos_hint: {'x': 6/7, 'y': 0}
         size_hint: 1/7, 1
-        text: '→'
+        text: '>>'
     
 #</KvLang>
 ''')
@@ -234,26 +234,6 @@ class DayTable(GridLayout):
             cell.set_background_color(background_color)
             cell.set_color(color)
 
-Builder.load_string('''
-#<KvLang>
-<KivyCalender>:
-    title_label: title_label
-    day_header: day_header
-    day_table: day_table
-    orientation: 'vertical'
-    TitleLabel:
-        id: title_label
-        size_hint_y: 0.1
-    DayHeader:
-        id: day_header
-        size_hint_y: 0.15
-    DayTable:
-        id: day_table
-        size_hint_y: 0.7
-
-#</KvLang>
-''')
-
 class KivyCalendarWidget(BoxLayout):
     '''
         A simple calender widget made by Kivy
@@ -273,7 +253,7 @@ class KivyCalendarWidget(BoxLayout):
     # 強調前の元々の色を保存
     pressed_background_before: KivyRgbaColor
     def __init__(self, theme: Optional[ColorTheme]=None, do_highlight_pressed_day: bool=True, 
-                 do_deselect_double_pressed_day: bool=False, cell_cls: DateCellBase=DateCell, monthFormat: Union[str, List[str]]='${month}月', **kwargs):
+                 do_deselect_double_pressed_day: bool=False, cell_cls: DateCellBase=DateCell, monthFormat: Union[str, List[str]]='${month}', **kwargs):
         super().__init__(**kwargs)
         self.today = datetime.now()
         self.year_now = self.today.year
@@ -283,13 +263,23 @@ class KivyCalendarWidget(BoxLayout):
         
         self.pressed = None
         
+        # build
+        self.orientation = 'vertical'
+        self.title_label = TitleLabel(size_hint_y=0.1)
+        self.add_widget(self.title_label)
+        self.day_header = DayHeader(size_hint_y=0.15)
+        self.add_widget(self.day_header)
+        self.day_table = DayTable(cell_cls, size_hint_y=0.75)
+        self.add_widget(self.day_table)
+        
+        # bind
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.title_label.ids['btn_next'].bind(on_release=self.next_month)
         self.title_label.ids['btn_previous'].bind(on_release=self.previous_month)
-        self.day_table.cell_cls = cell_cls
         self.day_table.set_cell_callback(self.datecell_released)
-        self.set_month(self.month_now, monthFormat)
         
+        # init calendar appearance
+        self.set_month(self.month_now, monthFormat)
         if theme is None:
             theme = ColorTheme()
         self.load_theme(theme)
@@ -403,3 +393,23 @@ class KivyCalendarWidget(BoxLayout):
         self.day_table.load_theme(theme)
         
         self.pressed_background = theme.pressed_background
+
+
+def test():
+    from kivy.app import App
+    from kivycalendarwidget.colors import CalenderThemes
+    class TestApp(App):
+        def __init__(self, **kwargs):
+            super(TestApp, self).__init__(**kwargs)
+        
+        def build(self):
+            self.root = BoxLayout()
+            c = KivyCalendarWidget(theme=CalenderThemes.ICE_GREEN_THEME, monthFormat='${month}')
+            self.root.add_widget(c)
+            
+            return self.root
+
+    TestApp().run()
+
+if __name__ == '__main__':
+    test()
