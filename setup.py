@@ -12,7 +12,7 @@ def _requires_from_file(filename):
 
 setup(
     name="kivycalendarwidget",
-    version="0.1.0",
+    version="0.2.0",
     description="a simple calendar widget with easy customization.",
     author="Take-Me1010",
     url="https://github.com/Take-Me1010/calendarWidget.git",

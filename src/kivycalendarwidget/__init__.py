@@ -1,4 +1,10 @@
-from typing import Annotated, Any, Dict, List, NamedTuple, Optional, Tuple, Union
+
+from typing import Any, Dict, List, Optional, Union
+try:
+    from typing import Annotated
+except:
+    from typing_extensions import Annotated
+
 from datetime import datetime, timedelta
 import calendar
 from kivy.uix.behaviors.button import ButtonBehavior

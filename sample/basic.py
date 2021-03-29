@@ -9,8 +9,8 @@ from kivy.config import Config
 import japanize_kivy
 from kivy.uix.boxlayout import BoxLayout
 
-from Kivycalendarwidget import KivyCalendarWidget, DateCell
-from Kivycalendarwidget.colors import CalenderThemes
+from kivycalendarwidget import KivyCalendarWidget, DateCell
+from kivycalendarwidget.colors import CalenderThemes
 
 
 def main():
