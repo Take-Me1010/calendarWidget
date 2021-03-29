@@ -6,7 +6,11 @@ from kivy.app import App
 from kivy.config import Config
 # Config.set('modules', 'inspector', '')
 # Config.set('modules', 'showborder', '')
-import japanize_kivy
+try:
+    import japanize_kivy
+except ImportError:
+    pass
+
 from kivy.uix.boxlayout import BoxLayout
 
 from kivycalendarwidget import KivyCalendarWidget, DateCell

@@ -280,6 +280,7 @@ class KivyCalendarWidget(BoxLayout):
         
         # init calendar appearance
         self.set_month(self.month_now, monthFormat)
+        self.set_year(self.year_now)
         if theme is None:
             theme = ColorTheme()
         self.load_theme(theme)
