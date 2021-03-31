@@ -247,7 +247,11 @@ class KivyCalendarWidget(BoxLayout):
     year_now: int
     month_now: int
     # 選択した日にちを次に選択するまでハイライトするかどうか
+    # whether calendar do highlight against the day if user select/press it.
     do_highlight_pressed_day: bool
+    # 二回押されたら選択を解除するか
+    # whether calendar deselect the day user selected if user select/press same day.
+    do_deselect_double_pressed_day: bool
     # 押されたセルを記録しておく
     pressed: Union[DateCell, None]
     # 強調前の元々の色を保存

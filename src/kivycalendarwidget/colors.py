@@ -28,6 +28,10 @@ class KivyColors:
     SKY_BLUE: KivyRgbaColor = (144/255, 215/255, 236/255, 1)
 
 class ColorTheme(NamedTuple):
+    ''' the base class for color theme.
+    
+        you can customize calendar appearance with this class.
+    '''
     # カレンダーの背景色
     background_color: KivyRgbaColor = KivyColors.BLACK
     # 月タイトル文字色
@@ -57,6 +61,7 @@ class ColorTheme(NamedTuple):
 
 class CalenderThemes:
     DARK_THEME = ColorTheme()
+    
     LIGHT_THEME = ColorTheme(
         background_color=KivyColors.WHITE,
         header_background=KivyColors.WHITE,
@@ -71,6 +76,7 @@ class CalenderThemes:
         nextdays_color=KivyColors.BLACK,
         pressed_background=[0.8, 0, 0, 0.5]
     )
+    
     ICE_GREEN_THEME = ColorTheme(
         background_color=KivyColors.ICE_GREEN,
         month_color=KivyColors.BLACK,

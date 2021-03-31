@@ -2,14 +2,6 @@
 from typing import List
 
 from kivy.app import App
-#* config *#
-from kivy.config import Config
-# Config.set('modules', 'inspector', '')
-# Config.set('modules', 'showborder', '')
-try:
-    import japanize_kivy
-except ImportError:
-    pass
 
 from kivy.uix.boxlayout import BoxLayout
 
@@ -26,9 +18,10 @@ class TestApp(App):
         monthsEnglish: List[str] = [
             'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'
         ]
-        # monthFormat: str = '${month}月だよ！'
+        # monthFormat must be List[str] whose length is 12 or str which contains ${month}
+        # if List[str], its order must correspond to 1-12 month.
+        # if str, ${month} is replaced an actual month; 1-12.
         monthFormat: List[str] = monthsEnglish
-        # monthFormat: List[str] = [m[:3]+'.' for m in monthsEnglish]
         
         c = KivyCalendarWidget(do_highlight_pressed_day=True, do_deselect_double_pressed_day=True, monthFormat=monthFormat)
         c.bind(
@@ -37,24 +30,51 @@ class TestApp(App):
             on_day_select=self._on_select_day,
             on_day_deselect=self._on_deselect_day
         )
-        
-        # c.load_theme(CalenderThemes.LIGHT_THEME)
-        c.load_theme(CalenderThemes.ICE_GREEN_THEME)
+        # load theme. if no theme given, default theme (dark) used.
+        c.load_theme(CalenderThemes.LIGHT_THEME)
         
         self.root.add_widget(c)
         return self.root
 
     def _on_pre(self, instance: KivyCalendarWidget, cell: DateCell, month_src: int, month_dest: int):
-        print(f'{month_src} -> {month_dest}')
+        """called when the current month turns into its previous month.
+
+        Args:
+            instance (KivyCalendarWidget): instance
+            cell (DateCell): the instance of its cell class which is set when making instance of KivyCalendarWidget
+            month_src (int): the month just before.
+            month_dest (int): the month which is turned into
+        """
+        print(f'_on_pre called : month_src = {month_src} -> month_dest= {month_dest}')
     
     def _on_next(self, instance: KivyCalendarWidget, cell: DateCell, month_src: int, month_dest: int):
-        print(f'{month_src} -> {month_dest}')
+        """called when the current month turns into its next month.
+
+        Args:
+            instance (KivyCalendarWidget): instance
+            cell (DateCell): the instance of its cell class which is set when making instance of KivyCalendarWidget
+            month_src (int): the month just before.
+            month_dest (int): the month which is turned into
+        """
+        print(f'_on_next called : month_src = {month_src} -> month_dest = {month_dest}')
         
     def _on_select_day(self, instance: KivyCalendarWidget, cell: DateCell):
-        print(f'Select {cell.month} / {cell.date}')
+        """called when user select a day.
+
+        Args:
+            instance (KivyCalendarWidget): instance
+            cell (DateCell): the instance of its cell class which is set when making instance of KivyCalendarWidget
+        """
+        print(f'_on_select_day called : {cell.month} / {cell.date}')
     
     def _on_deselect_day(self, instance: KivyCalendarWidget, cell: DateCell):
-        print(f'Deselect {cell.month} / {cell.date}')
+        """called when user deselect a day.
+
+        Args:
+            instance (KivyCalendarWidget): instance
+            cell (DateCell): the instance of its cell class which is set when making instance of KivyCalendarWidget
+        """
+        print(f'_on_deselect_day : {cell.month} / {cell.date}')
 
 def main():
     TestApp().run()
