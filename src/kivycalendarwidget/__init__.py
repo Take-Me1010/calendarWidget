@@ -1,4 +1,11 @@
 
+'''A simple calendar widget for Kivy
+
+Todo:
+    - more documentation
+    - enable user to customize the two buttons to change its month.
+'''
+
 from typing import Any, Dict, List, Optional, Union
 try:
     from typing import Annotated
@@ -53,41 +60,45 @@ Builder.load_string('''
 #</KvLang>
 ''')
 
+
 class TitleLabel(FloatLayout):
     label_month: Label
     label_year: Label
     monthformat: Union[str, List[str]]
+
     def __init__(self, **kwargs):
         super(TitleLabel, self).__init__(**kwargs)
         self.monthformat = None
 
-    def set_month(self, month: str, monthFormat: Optional[Union[str, List[str]]]=None):
+    def set_month(self, month: str, monthFormat: Optional[Union[str, List[str]]] = None):
         if monthFormat:
             self.monthformat = monthFormat
         self.label_month.text = self.getFormattedMonth(month)
-        
-    
+
     def getFormattedMonth(self, month: Annotated[int, (1, 12)]) -> str:
         monthString: str = str(month)
         if self.monthformat is None:
             return monthString
-        
+
         monthFormat = self.monthformat
         if isinstance(monthFormat, str):
             monthString = monthFormat.replace('${month}', str(month))
         elif isinstance(monthFormat, list):
             try:
-                monthString = monthFormat[month-1].replace('${month}', str(month))
+                monthString = monthFormat[month -
+                                          1].replace('${month}', str(month))
             except IndexError:
-                raise IndexError(f'The length of argument:monthFormat must be 12, not {len(monthString)}')
+                raise IndexError(
+                    f'The length of argument:monthFormat must be 12, not {len(monthString)}')
         else:
-            raise TypeError(f'The type of argument:monthFormat must be str or list, not {type(monthFormat)}')
-        
+            raise TypeError(
+                f'The type of argument:monthFormat must be str or list, not {type(monthFormat)}')
+
         return monthString
-        
+
     def set_year(self, year: str):
         self.label_year.text = year
-        
+
     def load_style(self, month_color: KivyRgbaColor, year_color: KivyRgbaColor):
         self.label_month.color = month_color
         self.label_year.color = year_color
@@ -101,9 +112,11 @@ Builder.load_string('''
 #</KvLang>
 ''')
 
+
 class DayHeader(GridLayout):
     header: List[str]
     label_headers: List[BackgroundLabel]
+
     def __init__(self, **kwargs):
         super(DayHeader, self).__init__(**kwargs)
         header = calendar.day_name[:]
@@ -116,7 +129,7 @@ class DayHeader(GridLayout):
             )
             self.label_headers.append(lbl)
             self.add_widget(lbl)
-    
+
     def load_style(self, style: List[Dict[str, Any]]):
         for child, s in zip(self.label_headers, style):
             for key in s.keys():
@@ -135,7 +148,10 @@ Builder.load_string('''
 ''')
 
 # DateCellをカスタムする際に継承する必要があるクラス
+
+
 class DateCellBase(ButtonBehavior, BackgroundColor):
+
     # 曜日を表す数字0~6
     day: int
     # 日にちを表す文字列
@@ -146,13 +162,14 @@ class DateCellBase(ButtonBehavior, BackgroundColor):
     is_now_month: bool
     # テーマ
     theme: ColorTheme
-    def __init__(self, day: int, date: str, month: int, is_now_month: bool=True, **kwargs):
+
+    def __init__(self, day: int, date: str, month: int, is_now_month: bool = True, **kwargs):
         super(DateCellBase, self).__init__(**kwargs)
         self.day = day
         self.date = date
         self.month = month
         self.is_now_month = is_now_month
-    
+
     def set_theme(self, theme: ColorTheme):
         self.theme = theme
 
@@ -171,11 +188,14 @@ class DateCellBase(ButtonBehavior, BackgroundColor):
         raise NotImplementedError()
 
 # DateCellはBaseと、見た目をカスタムするためのwidgetを継承する
+
+
 class DateCell(DateCellBase, Label):
-    def __init__(self, day: int, date: str, month: int, is_now_month: bool=True, **kwargs):
-        super(DateCell, self).__init__(day, date, month, is_now_month, **kwargs)
+    def __init__(self, day: int, date: str, month: int, is_now_month: bool = True, **kwargs):
+        super(DateCell, self).__init__(
+            day, date, month, is_now_month, **kwargs)
         self.text = str(date) if is_now_month else f'{month}/{date}'
-    
+
     # 必ずオーバーライトする。
     def set_color(self, color: KivyRgbaColor):
         if self.day == 0:
@@ -185,17 +205,19 @@ class DateCell(DateCellBase, Label):
         else:
             self.color = color
 
+
 class DayTable(GridLayout):
     callback: callable
     theme: ColorTheme
-    def __init__(self, cell_cls: DateCellBase=DateCell, **kwargs):
+
+    def __init__(self, cell_cls: DateCellBase = DateCell, **kwargs):
         super(DayTable, self).__init__(**kwargs)
         self.cell_cls = cell_cls
-    
+
     def set_cell_callback(self, callback: callable):
         self.callback = callback
 
-    def set_table(self, year: int, month: int, cell_cls: Optional[DateCellBase]=None):
+    def set_table(self, year: int, month: int, cell_cls: Optional[DateCellBase] = None):
         self.clear_widgets()
         date_first = datetime.strptime(f'{year}/{month}/1', '%Y/%m/%d')
         #! 以下は日曜=0の前提の処理。
@@ -206,15 +228,16 @@ class DayTable(GridLayout):
             self.cell_cls = cell_cls
         c = self.cell_cls
         for i in range(self.rows*self.cols):
-            cell = c(day=i%7, date=str(date.day), month=date.month, is_now_month= (date.month == month))
+            cell = c(day=i % 7, date=str(date.day), month=date.month,
+                     is_now_month=(date.month == month))
             cell.bind(on_release=self.callback)
             self.add_widget(cell)
             date += timedelta(days=1)
-        
+
         # テーマをリロード
         if hasattr(self, 'theme'):
             self.load_theme(self.theme)
-    
+
     def load_theme(self, theme: ColorTheme):
         self.theme = theme
         # 6*7の日の一覧表の中心は各月
@@ -230,16 +253,22 @@ class DayTable(GridLayout):
             else:
                 background_color = theme.nextdays_background
                 color = theme.nextdays_color
-            
+
             cell.set_background_color(background_color)
             cell.set_color(color)
 
+
 class KivyCalendarWidget(BoxLayout):
+    ''' A simple calender widget made by Kivy
+
+        this widget provides easy customization for its appearance!
+
+    Attributes:
+        pressed (None | DateCell | any class inheriting DateCellBase) the cell user selects. If None, no cell is selected.
+
     '''
-        A simple calender widget made by Kivy
-        
-    '''
-    __events__ = ('on_next_month', 'on_previous_month', 'on_day_select', 'on_day_deselect')
+    __events__ = ('on_next_month', 'on_previous_month',
+                  'on_day_select', 'on_day_deselect')
     today: datetime
     title_label: TitleLabel
     day_header: DayHeader
@@ -256,17 +285,29 @@ class KivyCalendarWidget(BoxLayout):
     pressed: Union[DateCell, None]
     # 強調前の元々の色を保存
     pressed_background_before: KivyRgbaColor
-    def __init__(self, theme: Optional[ColorTheme]=None, do_highlight_pressed_day: bool=True, 
-                 do_deselect_double_pressed_day: bool=False, cell_cls: DateCellBase=DateCell, monthFormat: Union[str, List[str]]='${month}', **kwargs):
+
+    def __init__(self, theme: Optional[ColorTheme] = None, do_highlight_pressed_day: bool = True,
+                 do_deselect_double_pressed_day: bool = False, cell_cls: DateCellBase = DateCell, monthFormat: Union[str, List[str]] = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'], **kwargs):
+        """A simple calendar widget for Kivy
+
+        Args:
+            theme (Optional[ColorTheme], optional): theme object generated through ColorTheme. if None, default theme will be used. Defaults to None.
+            do_highlight_pressed_day (bool, optional): define if the cell user selects is highlighted. Defaults to True.
+            do_deselect_double_pressed_day (bool, optional): define if the cell is deselected when user selects it twice. Defaults to False.
+            cell_cls (DateCellBase, optional): an argument prepared to custom. See README and samples. Defaults to DateCell.
+            monthFormat (Union[str, List[str]], optional): an argument to deside what kind of style the calendar widget shows the current month. Defaults to '${month}'.
+        """
         super().__init__(**kwargs)
-        self.today = datetime.now()
-        self.year_now = self.today.year
-        self.month_now = self.today.month
+        # now, calendar shows the month of today at first.
+        today = datetime.now()
+        self.year_now = today.year
+        self.month_now = today.month
+
         self.do_highlight_pressed_day = do_highlight_pressed_day
         self.do_deselect_double_pressed_day = do_deselect_double_pressed_day
-        
+
         self.pressed = None
-        
+
         # build
         self.orientation = 'vertical'
         self.title_label = TitleLabel(size_hint_y=0.1)
@@ -275,40 +316,43 @@ class KivyCalendarWidget(BoxLayout):
         self.add_widget(self.day_header)
         self.day_table = DayTable(cell_cls, size_hint_y=0.75)
         self.add_widget(self.day_table)
-        
+
         # bind
         self.bind(size=self._update_rect, pos=self._update_rect)
         self.title_label.ids['btn_next'].bind(on_release=self.next_month)
-        self.title_label.ids['btn_previous'].bind(on_release=self.previous_month)
+        self.title_label.ids['btn_previous'].bind(
+            on_release=self.previous_month)
         self.day_table.set_cell_callback(self.datecell_released)
-        
+
         # init calendar appearance
         self.set_month(self.month_now, monthFormat)
         self.set_year(self.year_now)
         if theme is None:
             theme = ColorTheme()
         self.load_theme(theme)
-    
-    def reload(self, month:Optional[int]=None):
+
+    def reload(self, month: Optional[int] = None):
         self.set_month(month or self.month_now)
 
     def datecell_released(self, instance: DateCell):
         month_selected = instance.month
         if month_selected < self.month_now:
-            self.dispatch('on_previous_month', instance, self.month_now, month_selected)
+            self.dispatch('on_previous_month', instance,
+                          self.month_now, month_selected)
             self.previous_month(instance)
         elif month_selected > self.month_now:
-            self.dispatch('on_next_month', instance, self.month_now, month_selected)
+            self.dispatch('on_next_month', instance,
+                          self.month_now, month_selected)
             self.next_month(instance)
         else:
             pass
-        
+
         if instance != self.pressed or not self.do_deselect_double_pressed_day:
             self.deselect_cell()
             self.select_cell(instance)
         else:
             self.deselect_cell()
-    
+
     def select_cell(self, cell: DateCell):
         ''' cellを選択状態にする '''
         self.dispatch('on_day_select', cell)
@@ -323,16 +367,16 @@ class KivyCalendarWidget(BoxLayout):
             self.dispatch('on_day_deselect', self.pressed)
             self.pressed.background_color = self.pressed_background_before
         self.pressed = None
-        
+
     def on_previous_month(self, *args, **kwargs):
         pass
-    
+
     def on_next_month(self, *args, **kwargs):
         pass
-    
+
     def on_day_select(self, *args, **kwargs):
         pass
-    
+
     def on_day_deselect(self, *args, **kwargs):
         pass
 
@@ -344,7 +388,7 @@ class KivyCalendarWidget(BoxLayout):
             self.set_year(self.year_now+1)
             month_next %= 12
         self.set_month(month=month_next)
-    
+
     def previous_month(self, *args):
         """先月のカレンダーを表示する
         """
@@ -353,13 +397,13 @@ class KivyCalendarWidget(BoxLayout):
             self.set_year(self.year_now-1)
             month_previous += 12
         self.set_month(month=month_previous)
-    
+
     def set_year(self, year: int):
         self.year_now = year
         self.title_label.set_year(str(year))
         self.day_table.set_table(year=year, month=self.month_now)
-        
-    def set_month(self, month: Annotated[int, (1, 12)], monthFormat: Optional[Union[str, List[str]]]=None):
+
+    def set_month(self, month: Annotated[int, (1, 12)], monthFormat: Optional[Union[str, List[str]]] = None):
         """表示する月をセットする
 
         Args:
@@ -370,7 +414,7 @@ class KivyCalendarWidget(BoxLayout):
 
         self.title_label.set_month(month, monthFormat)
         self.day_table.set_table(year=self.year_now, month=month)
-    
+
     def set_background_color(self, color: List[float]):
         # self.canvas.before.clear()
         with self.canvas.before:
@@ -384,37 +428,43 @@ class KivyCalendarWidget(BoxLayout):
         if hasattr(self, 'rect'):
             self.rect.size = instance.size
             self.rect.pos = instance.pos
-    
+
     def load_theme(self, theme: ColorTheme):
         self.set_background_color(theme.background_color)
 
         self.title_label.load_style(theme.month_color, theme.year_color)
-        
-        header_style = [{'color': theme.sunday, 'background_color': theme.header_background}]
-        header_style.extend([{'color': theme.weekdays, 'background_color': theme.header_background} for _ in range(5)])
-        header_style.append({'color': theme.saturday, 'background_color': theme.header_background})
+
+        header_style = [{'color': theme.sunday,
+                         'background_color': theme.header_background}]
+        header_style.extend(
+            [{'color': theme.weekdays, 'background_color': theme.header_background} for _ in range(5)])
+        header_style.append(
+            {'color': theme.saturday, 'background_color': theme.header_background})
         self.day_header.load_style(header_style)
-        
+
         self.day_table.load_theme(theme)
-        
+
         self.pressed_background = theme.pressed_background
 
 
 def test():
     from kivy.app import App
     from kivycalendarwidget.colors import CalenderThemes
+
     class TestApp(App):
         def __init__(self, **kwargs):
             super(TestApp, self).__init__(**kwargs)
-        
+
         def build(self):
             self.root = BoxLayout()
-            c = KivyCalendarWidget(theme=CalenderThemes.ICE_GREEN_THEME, monthFormat='${month}')
+            c = KivyCalendarWidget(
+                theme=CalenderThemes.ICE_GREEN_THEME, monthFormat='${month}')
             self.root.add_widget(c)
-            
+
             return self.root
 
     TestApp().run()
+
 
 if __name__ == '__main__':
     test()
