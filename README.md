@@ -16,12 +16,12 @@ unreleased now.
 
 You can set some functions when called on a certain condition. Here are all of them.
 
-|name|when called|args|
-|----|-----------|----|
-|`on_next_month`|when the shown month on the calendar changes its **next** one|instance: KivyCalendarWidget, cell: DateCell, month_src: int, month_dest: int|
-|`on_previous_month`|when the shown month on the calendar changes its **previous** one|instance: KivyCalendarWidget, cell: DateCell, month_src: int, month_dest: int|
-|`on_day_select`|when user selects a day|instance: KivyCalendarWidget, cell: DateCell|
-|`on_day_deselect`|when user deselects a day|instance: KivyCalendarWidget, cell: DateCell|
+| name                | when called                                                       | args                                                                          |
+| ------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `on_next_month`     | when the shown month on the calendar changes its **next** one     | instance: KivyCalendarWidget, cell: DateCell, month_src: int, month_dest: int |
+| `on_previous_month` | when the shown month on the calendar changes its **previous** one | instance: KivyCalendarWidget, cell: DateCell, month_src: int, month_dest: int |
+| `on_day_select`     | when user selects a day                                           | instance: KivyCalendarWidget, cell: DateCell                                  |
+| `on_day_deselect`   | when user deselects a day                                         | instance: KivyCalendarWidget, cell: DateCell                                  |
 
 See more [sample/basic.py](sample/basic.py).
 
@@ -47,7 +47,7 @@ But you can make your own theme!
 from kivycalendarwidget.colors import ColorTheme, KivyColors
 # You can customize calendar appearance easily by using ColorTheme(NamedTuple).
 MyTheme = ColorTheme(
-    background_color=KivyColors.SKY_BLUE,
+    title_background_color=KivyColors.SKY_BLUE,
     header_background=KivyColors.AQUA_GREEN,
     nowdays_background=KivyColors.WHITE,
     nowdays_color=KivyColors.BLACK,

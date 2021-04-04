@@ -7,6 +7,7 @@ Todo:
 '''
 
 from typing import Any, Dict, List, Optional, Union
+
 try:
     from typing import Annotated
 except:
@@ -23,35 +24,39 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.graphics import Rectangle, Color
 from kivy.lang.builder import Builder
 
-from kivycalendarwidget.colors import KivyRgbaColor, ColorTheme
-from kivycalendarwidget.backgroundwidgets import BackgroundButton, BackgroundColor, BackgroundLabel
+try:
+    from kivycalendarwidget.colors import KivyRgbaColor, ColorTheme
+    from kivycalendarwidget.backgroundwidgets import BackgroundButton, BackgroundColor, BackgroundLabel
 
+except:
+    from colors import KivyRgbaColor, ColorTheme
+    from backgroundwidgets import BackgroundButton, BackgroundLabel, BackgroundColor
 
 Builder.load_string('''
 #<KvLang>
 <TitleLabel>:
     label_month: lbl_month
     label_year: lbl_year
+    btn_previous: btn_previous
+    btn_next: btn_next
     Label:
         id: lbl_month
         pos_hint: {'x': 2/7, 'y': 0}
         size_hint: 3/7, 1
-        # text: '3月'
         font_size: 25
     
     Label:
         id: lbl_year
         pos_hint: {'x': 0, 'y': 0}
         size_hint: 2/7, 0.5
-        # text: '2021'
     
-    Button:
+    BackgroundButton:
         id: btn_previous
         pos_hint: {'x': 5/7, 'y': 0}
         size_hint: 1/7, 1
         text: '<<'
     
-    Button:
+    BackgroundButton:
         id: btn_next
         pos_hint: {'x': 6/7, 'y': 0}
         size_hint: 1/7, 1
@@ -64,6 +69,8 @@ Builder.load_string('''
 class TitleLabel(FloatLayout):
     label_month: Label
     label_year: Label
+    btn_previous: BackgroundButton
+    btn_next: BackgroundButton
     monthformat: Union[str, List[str]]
 
     def __init__(self, **kwargs):
@@ -99,9 +106,14 @@ class TitleLabel(FloatLayout):
     def set_year(self, year: str):
         self.label_year.text = year
 
-    def load_style(self, month_color: KivyRgbaColor, year_color: KivyRgbaColor):
-        self.label_month.color = month_color
-        self.label_year.color = year_color
+    def load_theme(self, theme: ColorTheme):
+        self.label_month.color = theme.month_color
+        self.label_year.color = theme.year_color
+        self.btn_previous.background_color = theme.arrow_background_color
+        self.btn_next.background_color = theme.arrow_background_color
+
+        self.btn_previous.text = theme.arrow_style[0]
+        self.btn_next.text = theme.arrow_style[1]
 
 
 Builder.load_string('''
@@ -218,15 +230,18 @@ class DayTable(GridLayout):
         self.callback = callback
 
     def set_table(self, year: int, month: int, cell_cls: Optional[DateCellBase] = None):
+        # セルを全て消去
         self.clear_widgets()
         date_first = datetime.strptime(f'{year}/{month}/1', '%Y/%m/%d')
         #! 以下は日曜=0の前提の処理。
         day_index: int = (date_first.weekday() + 1) % 7
         # 左上の日にちを計算
         date = date_first - timedelta(days=day_index)
+
         if cell_cls:
             self.cell_cls = cell_cls
         c = self.cell_cls
+
         for i in range(self.rows*self.cols):
             cell = c(day=i % 7, date=str(date.day), month=date.month,
                      is_now_month=(date.month == month))
@@ -319,8 +334,8 @@ class KivyCalendarWidget(BoxLayout):
 
         # bind
         self.bind(size=self._update_rect, pos=self._update_rect)
-        self.title_label.ids['btn_next'].bind(on_release=self.next_month)
-        self.title_label.ids['btn_previous'].bind(
+        self.title_label.btn_next.bind(on_release=self.next_month)
+        self.title_label.btn_previous.bind(
             on_release=self.previous_month)
         self.day_table.set_cell_callback(self.datecell_released)
 
@@ -430,9 +445,9 @@ class KivyCalendarWidget(BoxLayout):
             self.rect.pos = instance.pos
 
     def load_theme(self, theme: ColorTheme):
-        self.set_background_color(theme.background_color)
+        self.set_background_color(theme.title_background_color)
 
-        self.title_label.load_style(theme.month_color, theme.year_color)
+        self.title_label.load_theme(theme)
 
         header_style = [{'color': theme.sunday,
                          'background_color': theme.header_background}]
@@ -449,7 +464,10 @@ class KivyCalendarWidget(BoxLayout):
 
 def test():
     from kivy.app import App
-    from kivycalendarwidget.colors import CalenderThemes
+    try:
+        from kivycalendarwidget.colors import CalenderThemes, KivyColors
+    except:
+        from colors import CalenderThemes, KivyColors
 
     class TestApp(App):
         def __init__(self, **kwargs):
@@ -457,8 +475,7 @@ def test():
 
         def build(self):
             self.root = BoxLayout()
-            c = KivyCalendarWidget(
-                theme=CalenderThemes.ICE_GREEN_THEME, monthFormat='${month}')
+            c = KivyCalendarWidget(monthFormat='${month}')
             self.root.add_widget(c)
 
             return self.root
